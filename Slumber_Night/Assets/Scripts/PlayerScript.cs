@@ -40,7 +40,11 @@ public class PlayerScript : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
-        playerInput = new PlayerInput();
+        if(playerInput == null)
+        {
+            playerInput = new PlayerInput();
+        }
+        
         characterController = GetComponent<CharacterController>();
         anim = GetComponent<Animator>(); 
 
