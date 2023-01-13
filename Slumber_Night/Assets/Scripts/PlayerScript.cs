@@ -20,19 +20,19 @@ public class PlayerScript : MonoBehaviour
     bool isRunPressed;
     bool isSlidePressed; 
 
-    [SerializeField]
     float rotationFactorPerFrame = 30f;
-    [SerializeField]
     float playerSpeed = 5f;
+    float runSpeed = 5f;
     float runMultiplier = 3f;
     float groundedGravity = -0.05f;
-    float gravity = -0.5f;
+    float gravity = -0.03f;
 
-    // Variables to store optimised setter/getter parameter ID's
+    // Variables to store optimised setter/getter parameter ID's for animations
     int isWalkingHash;
     int isRunningHash; 
     int isIdleHash; 
     int isSlideHash;
+    int isFalling;
 
 
 
@@ -52,6 +52,7 @@ public class PlayerScript : MonoBehaviour
         isRunningHash = Animator.StringToHash("isRunning");
         isIdleHash = Animator.StringToHash("isIdle");
         isSlideHash = Animator.StringToHash("isSliding");
+        isFalling = Animator.StringToHash("isFalling");
 
         playerInput.CharacterControls.Movement.started += OnMovementInput;
         playerInput.CharacterControls.Movement.canceled += OnMovementInput;
@@ -109,57 +110,47 @@ public class PlayerScript : MonoBehaviour
         bool isWalking = anim.GetBool(isWalkingHash);
         bool isRunning = anim.GetBool(isRunningHash);
 
-        if(isMovementPressed && !isWalking)
-        {
-            anim.SetBool(isWalkingHash, true);
-            anim.SetBool(isIdleHash, false);
-            anim.SetBool(isRunningHash, false);
-            anim.SetBool(isSlideHash, false);
-
-        }
-        else if(!isMovementPressed && isWalking)
-        {
-            anim.SetBool(isIdleHash, true);
-            anim.SetBool(isWalkingHash, false);
-            anim.SetBool(isRunningHash, false);
-            anim.SetBool(isSlideHash, false);
-
-        }
-
-        if(isMovementPressed && isRunPressed)
-        {
-            anim.SetBool(isRunningHash, true);
-            anim.SetBool(isWalkingHash, false);
-            anim.SetBool(isIdleHash, false);
-            anim.SetBool(isSlideHash, false);
-           
-        }
-        else if((!isMovementPressed || !isRunning) && isRunning)
-        {
-            anim.SetBool(isIdleHash, true);
-            anim.SetBool(isWalkingHash, false);
-            anim.SetBool(isRunningHash, false);
-            anim.SetBool(isSlideHash, false);
-        }
-
-        if (isMovementPressed && isSlidePressed)
-        {
-            anim.SetBool(isSlideHash, true);
-            anim.SetBool(isRunningHash, false);
-            anim.SetBool(isWalkingHash, false);
-            anim.SetBool(isIdleHash, false);
-            characterController.height = 0.5f;
-        }
-
-        if(!isSlidePressed)
-        {
-            characterController.height = 1.45f;
+            if (!isMovementPressed)
+            {
+                anim.SetBool(isIdleHash, true);
+                anim.SetBool(isWalkingHash, false);
+                anim.SetBool(isRunningHash, false);
+                anim.SetBool(isSlideHash, false);
+                anim.SetBool(isFalling, false);
+            }
+            else if (isMovementPressed && !isWalking)
+            {
+                anim.SetBool(isWalkingHash, true);
+                anim.SetBool(isIdleHash, false);
+                anim.SetBool(isRunningHash, false);
+                anim.SetBool(isSlideHash, false);
+                anim.SetBool(isFalling, false);
+            }      
             
-        }
+            if (isMovementPressed && isRunPressed)
+            {
+                anim.SetBool(isRunningHash, true);
+                anim.SetBool(isWalkingHash, false);
+                anim.SetBool(isIdleHash, false);
+                anim.SetBool(isSlideHash, false);
+                anim.SetBool(isFalling, false);
 
+                if (isSlidePressed)
+                {
+                    anim.SetBool(isSlideHash, true);
+                    anim.SetBool(isRunningHash, false);
+                    anim.SetBool(isWalkingHash, false);
+                    anim.SetBool(isIdleHash, false);
+                    anim.SetBool(isFalling, false);
 
+                    characterController.height = 1f;
+                }
 
-
+                if (!isSlidePressed)
+                {
+                    characterController.height = 1.45f;
+                }
+            }
     }
 
     void HandleGravity()
@@ -183,7 +174,7 @@ public class PlayerScript : MonoBehaviour
     {
         if(isRunPressed)
         {
-            characterController.Move(currentRunMovement * Time.deltaTime * playerSpeed);
+            characterController.Move(currentRunMovement * Time.deltaTime * runSpeed);
         }
         else
         {
