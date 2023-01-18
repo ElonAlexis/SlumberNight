@@ -15,14 +15,15 @@ public class PlayerScript : MonoBehaviour
     Vector2 currentMovementInput; 
     Vector3 currentMovement;
     Vector3 currentRunMovement; 
+    Vector3 appliedMovement; 
+    Vector3 forwardDirection;
     //Vector3 slideMovement; 
     bool isMovementPressed;
     bool isRunPressed;
     bool isSlidePressed; 
 
-    float rotationFactorPerFrame = 30f;
+    float rotationFactorPerFrame = 0.1f;
     float playerSpeed = 5f;
-    float runSpeed = 5f;
     float runMultiplier = 3f;
     float groundedGravity = -0.05f;
     float gravity = -0.03f;
@@ -63,6 +64,7 @@ public class PlayerScript : MonoBehaviour
         playerInput.CharacterControls.RunningSlide.canceled += OnSlide;
 
 
+
     }
 
     void OnRun(InputAction.CallbackContext context)
@@ -94,8 +96,8 @@ public class PlayerScript : MonoBehaviour
     void OnMovementInput(InputAction.CallbackContext context)
     {
         currentMovementInput = context.ReadValue<Vector2>();
-        currentMovement.x = currentMovementInput.x;
-        currentMovement.z = currentMovementInput.y;
+        currentMovement.x =  currentMovementInput.x;
+        currentMovement.z =  currentMovementInput.y;
 
         currentRunMovement.x = currentMovementInput.x * runMultiplier;
         currentRunMovement.z = currentMovementInput.y * runMultiplier;
@@ -142,13 +144,6 @@ public class PlayerScript : MonoBehaviour
                     anim.SetBool(isWalkingHash, false);
                     anim.SetBool(isIdleHash, false);
                     anim.SetBool(isFalling, false);
-
-                    characterController.height = 1f;
-                }
-
-                if (!isSlidePressed)
-                {
-                    characterController.height = 1.45f;
                 }
             }
     }
@@ -172,19 +167,44 @@ public class PlayerScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(isRunPressed)
-        {
-            characterController.Move(currentRunMovement * Time.deltaTime * runSpeed);
-        }
-        else
-        {
-            characterController.Move(currentMovement * Time.deltaTime * playerSpeed);
-        }
-        
+        forwardDirection = transform.forward;
+        characterController.Move(appliedMovement * playerSpeed * Time.deltaTime);
+
         HandleAnimation();
         HandleRotation();
         HandleGravity();
+        Run();
+        Slide();
+    }
 
+    void Run() 
+    {
+        if (isRunPressed)
+        {
+            appliedMovement.x = currentRunMovement.x;
+            appliedMovement.z = currentRunMovement.z;
+        }
+        else
+        {
+            appliedMovement.x = currentMovement.x;
+            appliedMovement.z = currentMovement.z;
+        }
+
+       
+    }
+    void Slide()
+    {
+        if (isSlidePressed)
+        {
+            
+            currentMovement = forwardDirection;
+            currentMovement = Vector3.ClampMagnitude(currentMovement,playerSpeed);
+            characterController.height = 1f;
+        }
+        else
+        {
+            characterController.height = 1.45f;
+        }
     }
 
 
