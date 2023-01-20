@@ -21,19 +21,28 @@ public class PlayerScript : MonoBehaviour
     bool isMovementPressed;
     bool isRunPressed;
     bool isSlidePressed; 
+    bool isJumpPressed;
+    bool isJumping; 
+    bool isJumpAnimating; 
 
     float rotationFactorPerFrame = 0.1f;
     float playerSpeed = 5f;
     float runMultiplier = 3f;
     float groundedGravity = -0.05f;
     float gravity = -0.03f;
+    float initialJumpVelocity; 
+    float maxJumpHeight = 120f; 
+    float maxJumpTime = 200f;
+
 
     // Variables to store optimised setter/getter parameter ID's for animations
     int isWalkingHash;
     int isRunningHash; 
     int isIdleHash; 
     int isSlideHash;
-    int isFalling;
+    int isFallingHash;
+    int isJumpingHash;
+    int isRunJumpingHash; 
 
 
 
@@ -53,7 +62,9 @@ public class PlayerScript : MonoBehaviour
         isRunningHash = Animator.StringToHash("isRunning");
         isIdleHash = Animator.StringToHash("isIdle");
         isSlideHash = Animator.StringToHash("isSliding");
-        isFalling = Animator.StringToHash("isFalling");
+        isFallingHash = Animator.StringToHash("isFalling");
+        isJumpingHash = Animator.StringToHash("isJumping");
+        isRunJumpingHash = Animator.StringToHash("isRunJump");
 
         playerInput.CharacterControls.Movement.started += OnMovementInput;
         playerInput.CharacterControls.Movement.canceled += OnMovementInput;
@@ -62,11 +73,36 @@ public class PlayerScript : MonoBehaviour
         playerInput.CharacterControls.Run.canceled += OnRun;
         playerInput.CharacterControls.RunningSlide.started += OnSlide;
         playerInput.CharacterControls.RunningSlide.canceled += OnSlide;
+        playerInput.CharacterControls.Jump.started += OnJump;
+        playerInput.CharacterControls.Jump.canceled += OnJump;
 
-
-
+        SetupJumpVariables();
+    }
+    void SetupJumpVariables()
+    {
+        float timeToApex = maxJumpTime / 2;
+        gravity = (-2 * maxJumpHeight) / Mathf.Pow(timeToApex, 2);
+        initialJumpVelocity = (2 * maxJumpHeight) / timeToApex;
+    }
+    void HandleJump()
+    {
+        if(!isJumping && characterController.isGrounded && isJumpPressed)
+        {
+            isJumping = true;            
+            isJumpAnimating = true;
+            currentMovement.y = initialJumpVelocity * 1.5f;
+            currentRunMovement.y = initialJumpVelocity * 1.5f;
+        }
+        else if(isJumping && characterController.isGrounded && !isJumpPressed)
+        {
+            isJumping = false;
+        }
     }
 
+    void OnJump(InputAction.CallbackContext context)
+    {
+        isJumpPressed = context.ReadValueAsButton();
+    }
     void OnRun(InputAction.CallbackContext context)
     {
         isRunPressed = context.ReadValueAsButton();
@@ -118,16 +154,22 @@ public class PlayerScript : MonoBehaviour
                 anim.SetBool(isWalkingHash, false);
                 anim.SetBool(isRunningHash, false);
                 anim.SetBool(isSlideHash, false);
-                anim.SetBool(isFalling, false);
-            }
+                anim.SetBool(isFallingHash, false);
+                anim.SetBool(isJumpingHash, false);
+                anim.SetBool(isRunJumpingHash, false);
+
+        }
             else if (isMovementPressed && !isWalking)
             {
                 anim.SetBool(isWalkingHash, true);
                 anim.SetBool(isIdleHash, false);
                 anim.SetBool(isRunningHash, false);
                 anim.SetBool(isSlideHash, false);
-                anim.SetBool(isFalling, false);
-            }      
+                anim.SetBool(isFallingHash, false);
+                anim.SetBool(isJumpingHash, false);
+                anim.SetBool(isRunJumpingHash, false);
+
+        }      
             
             if (isMovementPressed && isRunPressed)
             {
@@ -135,7 +177,10 @@ public class PlayerScript : MonoBehaviour
                 anim.SetBool(isWalkingHash, false);
                 anim.SetBool(isIdleHash, false);
                 anim.SetBool(isSlideHash, false);
-                anim.SetBool(isFalling, false);
+                anim.SetBool(isFallingHash, false);
+                anim.SetBool(isJumpingHash, false);
+                anim.SetBool(isRunJumpingHash, false);
+
 
                 if (isSlidePressed)
                 {
@@ -143,20 +188,59 @@ public class PlayerScript : MonoBehaviour
                     anim.SetBool(isRunningHash, false);
                     anim.SetBool(isWalkingHash, false);
                     anim.SetBool(isIdleHash, false);
-                    anim.SetBool(isFalling, false);
+                    anim.SetBool(isFallingHash, false);
+                    anim.SetBool(isJumpingHash, false);
+                    anim.SetBool(isRunJumpingHash, false);
+
+            }
+                if(isJumpPressed)
+                {
+                    anim.SetBool(isRunJumpingHash, true);
+                    anim.SetBool(isSlideHash, false);
+                    anim.SetBool(isRunningHash, false);
+                    anim.SetBool(isWalkingHash, false);
+                    anim.SetBool(isIdleHash, false);
+                    anim.SetBool(isFallingHash, false);
+                    anim.SetBool(isJumpingHash, false);
                 }
+            }
+            if(isJumping)
+            {
+                anim.SetBool(isJumpingHash, true);
+                anim.SetBool(isIdleHash, false);
+                anim.SetBool(isWalkingHash, false);
+                anim.SetBool(isRunningHash, false);
+                anim.SetBool(isSlideHash, false);
+                anim.SetBool(isFallingHash, false);
             }
     }
 
     void HandleGravity()
     {
+        bool isFalling = currentMovement.y < 0f;
+
+
         if( characterController.isGrounded)
-        {            
+        {         
+            if(isJumpAnimating)
+            {
+                anim.SetBool(isJumpingHash, false);
+            }  
             currentMovement.y = groundedGravity;
             currentRunMovement.y = groundedGravity;
         }
+        else if(isFalling)
+        {
+            float newYVelocity = currentMovement.y + gravity;
+            float nextYVelocity = (currentMovement.y + newYVelocity) * 0.509f;
+            currentMovement.y = nextYVelocity;
+            currentRunMovement.y = newYVelocity;
+        }
         else 
-        {            
+        {           
+            float previousYVelocity = currentMovement.y; 
+            float newYVelocity = currentMovement.y + (gravity * Time.deltaTime);
+            float nextYVelocity = (previousYVelocity + newYVelocity) * 0.5f;
             currentMovement.y += gravity;
             currentRunMovement.y += gravity;
         }
@@ -168,26 +252,31 @@ public class PlayerScript : MonoBehaviour
     void Update()
     {
         forwardDirection = transform.forward;
-        characterController.Move(appliedMovement * playerSpeed * Time.deltaTime);
+        //characterController.Move(appliedMovement * playerSpeed * Time.deltaTime);
 
         HandleAnimation();
         HandleRotation();
-        HandleGravity();
-        Run();
+        PlayerMove();
         Slide();
+        HandleGravity();
+        HandleJump();
+
     }
 
-    void Run() 
+    void PlayerMove() 
     {
         if (isRunPressed)
         {
-            appliedMovement.x = currentRunMovement.x;
-            appliedMovement.z = currentRunMovement.z;
+           // appliedMovement.x = currentRunMovement.x;
+          //  appliedMovement.z = currentRunMovement.z;
+          characterController.Move(currentRunMovement * Time.deltaTime * playerSpeed);
         }
         else
         {
-            appliedMovement.x = currentMovement.x;
-            appliedMovement.z = currentMovement.z;
+            // appliedMovement.x = currentMovement.x;
+            //  appliedMovement.z = currentMovement.z;
+            characterController.Move(currentMovement * Time.deltaTime * playerSpeed);
+
         }
 
        
