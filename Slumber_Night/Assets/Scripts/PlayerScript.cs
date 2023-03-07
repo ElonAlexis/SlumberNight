@@ -263,6 +263,14 @@ public class PlayerScript : MonoBehaviour
 
     }
 
+    void update()
+    {
+        if(!characterController.isGrounded)
+        {
+            isJumping = true;
+        }
+    }
+
     void PlayerMove() 
     {
         if (isRunPressed)
