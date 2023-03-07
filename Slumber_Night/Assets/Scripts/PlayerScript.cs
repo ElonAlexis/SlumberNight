@@ -26,13 +26,13 @@ public class PlayerScript : MonoBehaviour
     bool isJumpAnimating; 
 
     float rotationFactorPerFrame = 0.1f;
-    float playerSpeed = 5f;
+    float playerSpeed = 7f;
     float runMultiplier = 3f;
-    float groundedGravity = -0.05f;
-    float gravity = -0.03f;
+    float groundedGravity = -9f;
+    float gravity = -9f;
     float initialJumpVelocity; 
-    float maxJumpHeight = 120f; 
-    float maxJumpTime = 200f;
+    float maxJumpHeight = 30f; 
+    float maxJumpTime = 25f;
 
 
     // Variables to store optimised setter/getter parameter ID's for animations
@@ -249,7 +249,7 @@ public class PlayerScript : MonoBehaviour
 
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         forwardDirection = transform.forward;
         //characterController.Move(appliedMovement * playerSpeed * Time.deltaTime);
