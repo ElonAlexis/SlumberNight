@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -22,7 +22,7 @@ public class PlayerScript : MonoBehaviour
     bool isRunPressed;
     bool isSlidePressed; 
     bool isJumpPressed;
-    bool isJumping; 
+    public bool isJumping; 
     bool isJumpAnimating; 
 
     float rotationFactorPerFrame = 0.1f;
@@ -95,6 +95,7 @@ public class PlayerScript : MonoBehaviour
         }
         else if(isJumping && characterController.isGrounded && !isJumpPressed)
         {
+            Debug.Log("Landed");
             isJumping = false;
         }
     }
@@ -265,10 +266,7 @@ public class PlayerScript : MonoBehaviour
 
     void update()
     {
-        if(!characterController.isGrounded)
-        {
-            isJumping = true;
-        }
+        
     }
 
     void PlayerMove() 
