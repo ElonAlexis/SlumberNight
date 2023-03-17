@@ -6,11 +6,11 @@ public class PickupTestScript : MonoBehaviour
 {
     void OnCollisionEnter(Collision col)
     {
-        Debug.Log(col.gameObject.name);
-        if(col.gameObject.tag == "Player")
-        {
-            Debug.Log("Touched Player!");
-        }
+        // Debug.Log(col.gameObject.name);
+        // if(col.gameObject.tag == "Player")
+        // {
+        //     Debug.Log("Touched Player!");
+        // }
 
     }
     

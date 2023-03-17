@@ -18,15 +18,18 @@ public class PlayerScript : MonoBehaviour
     Vector3 appliedMovement; 
     Vector3 forwardDirection;
     //Vector3 slideMovement; 
-    bool isMovementPressed;
+   public bool isMovementPressed;
+    public bool isCrouchPressed;
+
     bool isRunPressed;
     bool isSlidePressed; 
     bool isJumpPressed;
     public bool isJumping; 
     bool isJumpAnimating; 
+    public bool isInterracting;
 
-    float rotationFactorPerFrame = 0.1f;
-    float playerSpeed = 7f;
+    public float rotationFactorPerFrame = 0.1f;
+    public float playerSpeed = 7f;
     float runMultiplier = 3f;
     float groundedGravity = -9f;
     float gravity = -9f;
@@ -43,6 +46,9 @@ public class PlayerScript : MonoBehaviour
     int isFallingHash;
     int isJumpingHash;
     int isRunJumpingHash; 
+    int isCrouchedHash; 
+    int isCrouchWalkingHash;
+
 
 
 
@@ -65,6 +71,10 @@ public class PlayerScript : MonoBehaviour
         isFallingHash = Animator.StringToHash("isFalling");
         isJumpingHash = Animator.StringToHash("isJumping");
         isRunJumpingHash = Animator.StringToHash("isRunJump");
+        isCrouchedHash = Animator.StringToHash("isCrouched");
+        isCrouchWalkingHash = Animator.StringToHash("isCrouchWalking");
+
+
 
         playerInput.CharacterControls.Movement.started += OnMovementInput;
         playerInput.CharacterControls.Movement.canceled += OnMovementInput;
@@ -75,6 +85,10 @@ public class PlayerScript : MonoBehaviour
         playerInput.CharacterControls.RunningSlide.canceled += OnSlide;
         playerInput.CharacterControls.Jump.started += OnJump;
         playerInput.CharacterControls.Jump.canceled += OnJump;
+        playerInput.CharacterControls.Crouch.started += OnCrouch;
+        playerInput.CharacterControls.Crouch.canceled += OnCrouch;
+        playerInput.CharacterControls.Interract.started += OnInterract;
+        playerInput.CharacterControls.Interract.canceled += OnInterract;
 
         SetupJumpVariables();
     }
@@ -113,6 +127,14 @@ public class PlayerScript : MonoBehaviour
     {
         isSlidePressed = context.ReadValueAsButton();
     }
+    void OnCrouch(InputAction.CallbackContext context)
+    {
+        isCrouchPressed = context.ReadValueAsButton();
+    }
+    void OnInterract(InputAction.CallbackContext context)
+    {
+        isInterracting = context.ReadValueAsButton();
+    }
 
     void HandleRotation()
     {
@@ -148,8 +170,13 @@ public class PlayerScript : MonoBehaviour
     {
         bool isWalking = anim.GetBool(isWalkingHash);
         bool isRunning = anim.GetBool(isRunningHash);
+        bool isCrouching = anim.GetBool(isCrouchWalkingHash);
+        
 
-            if (!isMovementPressed)
+
+
+             
+            if(!isMovementPressed)
             {
                 anim.SetBool(isIdleHash, true);
                 anim.SetBool(isWalkingHash, false);
@@ -158,8 +185,25 @@ public class PlayerScript : MonoBehaviour
                 anim.SetBool(isFallingHash, false);
                 anim.SetBool(isJumpingHash, false);
                 anim.SetBool(isRunJumpingHash, false);
+                anim.SetBool(isCrouchedHash, false);
+                anim.SetBool(isCrouchWalkingHash, false);
 
-        }
+
+                if(isCrouchPressed)
+                {
+                    anim.SetBool(isCrouchedHash, true);
+                    anim.SetBool(isIdleHash, false);
+                    anim.SetBool(isWalkingHash, false);
+                    anim.SetBool(isRunningHash, false);
+                    anim.SetBool(isSlideHash, false);
+                    anim.SetBool(isFallingHash, false);
+                    anim.SetBool(isJumpingHash, false);
+                    anim.SetBool(isRunJumpingHash, false);
+                    anim.SetBool(isCrouchWalkingHash, false);
+                }
+
+
+            }              
             else if (isMovementPressed && !isWalking)
             {
                 anim.SetBool(isWalkingHash, true);
@@ -169,8 +213,37 @@ public class PlayerScript : MonoBehaviour
                 anim.SetBool(isFallingHash, false);
                 anim.SetBool(isJumpingHash, false);
                 anim.SetBool(isRunJumpingHash, false);
+                anim.SetBool(isCrouchedHash, false);
+                anim.SetBool(isCrouchWalkingHash, false);
 
-        }      
+
+                if(isCrouchPressed)
+                {
+                    anim.SetBool(isWalkingHash, false);                    
+                    anim.SetBool(isCrouchWalkingHash, true);
+                    anim.SetBool(isCrouchedHash, false);
+                    anim.SetBool(isIdleHash, false);
+                    anim.SetBool(isRunningHash, false);
+                    anim.SetBool(isSlideHash, false);
+                    anim.SetBool(isFallingHash, false);
+                    anim.SetBool(isJumpingHash, false);
+                    anim.SetBool(isRunJumpingHash, false);
+                }
+
+
+            }  
+            // else if(isMovementPressed && isCrouchPressed || isMovementPressed && isRunning && isCrouchPressed)
+            // {                
+            //     anim.SetBool(isWalkingHash, false);                    
+            //     anim.SetBool(isCrouchWalkingHash, true);
+            //     anim.SetBool(isCrouchedHash, false);
+            //     anim.SetBool(isIdleHash, false);
+            //     anim.SetBool(isRunningHash, false);
+            //     anim.SetBool(isSlideHash, false);
+            //     anim.SetBool(isFallingHash, false);
+            //     anim.SetBool(isJumpingHash, false);
+            //     anim.SetBool(isRunJumpingHash, false);
+            // }    
             
             if (isMovementPressed && isRunPressed)
             {
@@ -181,6 +254,10 @@ public class PlayerScript : MonoBehaviour
                 anim.SetBool(isFallingHash, false);
                 anim.SetBool(isJumpingHash, false);
                 anim.SetBool(isRunJumpingHash, false);
+                anim.SetBool(isCrouchedHash, false);
+                anim.SetBool(isCrouchWalkingHash, false);
+
+
 
 
                 if (isSlidePressed)
@@ -192,8 +269,12 @@ public class PlayerScript : MonoBehaviour
                     anim.SetBool(isFallingHash, false);
                     anim.SetBool(isJumpingHash, false);
                     anim.SetBool(isRunJumpingHash, false);
+                    anim.SetBool(isCrouchedHash, false);
+                    anim.SetBool(isCrouchWalkingHash, false);
 
-            }
+
+
+                }
                 if(isJumpPressed)
                 {
                     anim.SetBool(isRunJumpingHash, true);
@@ -203,6 +284,10 @@ public class PlayerScript : MonoBehaviour
                     anim.SetBool(isIdleHash, false);
                     anim.SetBool(isFallingHash, false);
                     anim.SetBool(isJumpingHash, false);
+                    anim.SetBool(isCrouchedHash, false);
+                    anim.SetBool(isCrouchWalkingHash, false);
+
+
                 }
             }
             if(isJumping)
@@ -213,7 +298,17 @@ public class PlayerScript : MonoBehaviour
                 anim.SetBool(isRunningHash, false);
                 anim.SetBool(isSlideHash, false);
                 anim.SetBool(isFallingHash, false);
-            }
+                anim.SetBool(isCrouchedHash, false);
+                anim.SetBool(isCrouchWalkingHash, false);
+
+
+            }     
+
+            
+           
+
+    
+            
     }
 
     void HandleGravity()
