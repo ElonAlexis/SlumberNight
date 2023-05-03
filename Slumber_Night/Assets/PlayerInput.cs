@@ -59,9 +59,17 @@ public class @PlayerInput : IInputActionCollection, IDisposable
                     ""interactions"": """"
                 },
                 {
-                    ""name"": ""Interract"",
+                    ""name"": ""Push"",
                     ""type"": ""Button"",
                     ""id"": ""0e8b82e6-e03b-4fe4-b16c-e9ccd251ff23"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": ""NormalizeVector2"",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""Pull"",
+                    ""type"": ""Button"",
+                    ""id"": ""4052edcb-ddef-4044-98db-e90f31a78e51"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": ""NormalizeVector2"",
                     ""interactions"": """"
@@ -281,10 +289,21 @@ public class @PlayerInput : IInputActionCollection, IDisposable
                     ""name"": """",
                     ""id"": ""1c2b4a44-23d6-4f49-81bd-58f92cc1ba70"",
                     ""path"": ""<Keyboard>/e"",
+                    ""interactions"": ""Tap"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Push"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4884d1a4-765b-4fd1-ade2-bb7ccea18869"",
+                    ""path"": ""<Keyboard>/q"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Interract"",
+                    ""action"": ""Pull"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -300,7 +319,8 @@ public class @PlayerInput : IInputActionCollection, IDisposable
         m_CharacterControls_RunningSlide = m_CharacterControls.FindAction("RunningSlide", throwIfNotFound: true);
         m_CharacterControls_Jump = m_CharacterControls.FindAction("Jump", throwIfNotFound: true);
         m_CharacterControls_Crouch = m_CharacterControls.FindAction("Crouch", throwIfNotFound: true);
-        m_CharacterControls_Interract = m_CharacterControls.FindAction("Interract", throwIfNotFound: true);
+        m_CharacterControls_Push = m_CharacterControls.FindAction("Push", throwIfNotFound: true);
+        m_CharacterControls_Pull = m_CharacterControls.FindAction("Pull", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -355,7 +375,8 @@ public class @PlayerInput : IInputActionCollection, IDisposable
     private readonly InputAction m_CharacterControls_RunningSlide;
     private readonly InputAction m_CharacterControls_Jump;
     private readonly InputAction m_CharacterControls_Crouch;
-    private readonly InputAction m_CharacterControls_Interract;
+    private readonly InputAction m_CharacterControls_Push;
+    private readonly InputAction m_CharacterControls_Pull;
     public struct CharacterControlsActions
     {
         private @PlayerInput m_Wrapper;
@@ -365,7 +386,8 @@ public class @PlayerInput : IInputActionCollection, IDisposable
         public InputAction @RunningSlide => m_Wrapper.m_CharacterControls_RunningSlide;
         public InputAction @Jump => m_Wrapper.m_CharacterControls_Jump;
         public InputAction @Crouch => m_Wrapper.m_CharacterControls_Crouch;
-        public InputAction @Interract => m_Wrapper.m_CharacterControls_Interract;
+        public InputAction @Push => m_Wrapper.m_CharacterControls_Push;
+        public InputAction @Pull => m_Wrapper.m_CharacterControls_Pull;
         public InputActionMap Get() { return m_Wrapper.m_CharacterControls; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -390,9 +412,12 @@ public class @PlayerInput : IInputActionCollection, IDisposable
                 @Crouch.started -= m_Wrapper.m_CharacterControlsActionsCallbackInterface.OnCrouch;
                 @Crouch.performed -= m_Wrapper.m_CharacterControlsActionsCallbackInterface.OnCrouch;
                 @Crouch.canceled -= m_Wrapper.m_CharacterControlsActionsCallbackInterface.OnCrouch;
-                @Interract.started -= m_Wrapper.m_CharacterControlsActionsCallbackInterface.OnInterract;
-                @Interract.performed -= m_Wrapper.m_CharacterControlsActionsCallbackInterface.OnInterract;
-                @Interract.canceled -= m_Wrapper.m_CharacterControlsActionsCallbackInterface.OnInterract;
+                @Push.started -= m_Wrapper.m_CharacterControlsActionsCallbackInterface.OnPush;
+                @Push.performed -= m_Wrapper.m_CharacterControlsActionsCallbackInterface.OnPush;
+                @Push.canceled -= m_Wrapper.m_CharacterControlsActionsCallbackInterface.OnPush;
+                @Pull.started -= m_Wrapper.m_CharacterControlsActionsCallbackInterface.OnPull;
+                @Pull.performed -= m_Wrapper.m_CharacterControlsActionsCallbackInterface.OnPull;
+                @Pull.canceled -= m_Wrapper.m_CharacterControlsActionsCallbackInterface.OnPull;
             }
             m_Wrapper.m_CharacterControlsActionsCallbackInterface = instance;
             if (instance != null)
@@ -412,9 +437,12 @@ public class @PlayerInput : IInputActionCollection, IDisposable
                 @Crouch.started += instance.OnCrouch;
                 @Crouch.performed += instance.OnCrouch;
                 @Crouch.canceled += instance.OnCrouch;
-                @Interract.started += instance.OnInterract;
-                @Interract.performed += instance.OnInterract;
-                @Interract.canceled += instance.OnInterract;
+                @Push.started += instance.OnPush;
+                @Push.performed += instance.OnPush;
+                @Push.canceled += instance.OnPush;
+                @Pull.started += instance.OnPull;
+                @Pull.performed += instance.OnPull;
+                @Pull.canceled += instance.OnPull;
             }
         }
     }
@@ -426,6 +454,7 @@ public class @PlayerInput : IInputActionCollection, IDisposable
         void OnRunningSlide(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
         void OnCrouch(InputAction.CallbackContext context);
-        void OnInterract(InputAction.CallbackContext context);
+        void OnPush(InputAction.CallbackContext context);
+        void OnPull(InputAction.CallbackContext context);
     }
 }
