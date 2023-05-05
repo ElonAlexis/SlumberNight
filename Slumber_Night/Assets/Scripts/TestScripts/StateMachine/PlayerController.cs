@@ -90,7 +90,7 @@ public class PlayerController : MonoBehaviour
         if(context.performed)
         {
             isPushPressed = true;
-        }
+       }
     }
     void OnPull(InputAction.CallbackContext context)
     {

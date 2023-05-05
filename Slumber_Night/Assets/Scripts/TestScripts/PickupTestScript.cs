@@ -9,6 +9,7 @@ public class PickupTestScript : MonoBehaviour
     [SerializeField] private Camera attachedCamera;
     [SerializeField] private PlayerController playerController;
 
+
     private Transform cam;
     public bool isHoldingObject = false;
     private GameObject objectToPickup;
@@ -20,12 +21,11 @@ public class PickupTestScript : MonoBehaviour
 
     private void Start()
     {
-        cam = attachedCamera.transform;
+        cam = attachedCamera.transform;       
     }
 
     private void Update()
-    {
-    
+    {    
         if (playerController.isPushPressed)
         {
             if (!isHoldingObject)
@@ -40,7 +40,7 @@ public class PickupTestScript : MonoBehaviour
                     {
                         // Disable physics and save object's local position and rotation
                         objectRigidbody.isKinematic = true;
-                        objectLocalPosition = objectToPickup.transform.localPosition;
+                        objectLocalPosition.y = objectToPickup.transform.localPosition.y + 10;
                         objectLocalRotation = objectToPickup.transform.localRotation;
                         // Parent object to player
                         objectToPickup.transform.SetParent(transform);
